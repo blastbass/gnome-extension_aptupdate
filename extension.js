@@ -8,9 +8,6 @@ const u = imports.misc.util;
 const e = eu.getCurrentExtension();
 const p = imports.ui.panelMenu;
 const pm = imports.ui.popupMenu;
-const Gettext = imports.gettext;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
 
 var AptShortcutsMenu = GObject.registerClass(
 
@@ -35,29 +32,33 @@ var AptShortcutsMenu = GObject.registerClass(
 
       this.add_actor(h);
 
-      let r = "read -p 'Название пакета: ' pkgName; ";
+      let r = "read -p 'Package name: ' pkgName; ";
 
-      this.menu.addAction("Обновить списки и пакеты", (_) => { this.execAction("sudo apt update && sudo apt upgrade -y"); });
+      this.menu.addAction("Update packages & lists", (_) => { this.execAction("pkexec apt update && pkexec apt upgrade -y"); });
       this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.menu.addAction("Обновить списки пакетов", (_) => { this.execAction("sudo apt update"); });
-      this.menu.addAction("Обновить пакеты", (_) => { this.execAction("sudo apt upgrade"); });
-      this.menu.addAction("Обновить пакеты (full-upgrade)", (_) => { this.execAction("sudo apt full-upgrade"); });
-      this.menu.addAction("Доступные обновления", (_) => { this.execAction("sudo apt list --upgradable"); });
-      this.menu.addAction("Установленные пакеты", (_) => { this.execAction("sudo apt list --installed"); });
+      this.menu.addAction("Update packages lists", (_) => { this.execAction("pkexec apt update"); });
+      this.menu.addAction("Update packages", (_) => { this.execAction("pkexec apt upgrade"); });
+      this.menu.addAction("Update packages (full-upgrade)", (_) => { this.execAction("pkexec apt full-upgrade"); });
+      this.menu.addAction("Updates list", (_) => { this.execAction("pkexec apt list --upgradable"); });
+      this.menu.addAction("Installed packages list", (_) => { this.execAction("pkexec apt list --installed"); });
       this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.menu.addAction("Установить пакет", (_) => { this.execAction(r + "sudo apt install $pkgName"); });
-      this.menu.addAction("Переустановить пакет", (_) => { this.execAction(r + "sudo apt install $pkgName --reinstall"); });
-      this.menu.addAction("Скачать пакет", (_) => { this.execAction(r + "apt download $pkgName"); });
-      this.menu.addAction("Поиск пакетов", (_) => { this.execAction(r + "sudo apt search $pkgName"); });
-      this.menu.addAction("Удалить пакет", (_) => { this.execAction(r + "sudo apt remove $pkgName"); });
-      this.menu.addAction("Удалить пакет (+ конфиг.)", (_) => { this.execAction(r + "sudo apt purge $pkgName"); });
-      this.menu.addAction("Удалить лишние пакеты", (_) => { this.execAction("sudo apt autoremove"); });
+      this.menu.addAction("Install package", (_) => { this.execAction(r + "pkexec apt install $pkgName"); });
+      this.menu.addAction("Reinstall package", (_) => { this.execAction(r + "pkexec apt install $pkgName --reinstall"); });
+      this.menu.addAction("Download package", (_) => { this.execAction(r + "apt download $pkgName"); });
+      this.menu.addAction("Search package", (_) => { this.execAction(r + "pkexec apt search $pkgName"); });
+      this.menu.addAction("Uninstall package", (_) => { this.execAction(r + "pkexec apt remove $pkgName"); });
+      this.menu.addAction("Uninstall package (purge)", (_) => { this.execAction(r + "pkexec apt purge $pkgName"); });
+      this.menu.addAction("Remove unnecessary packages", (_) => { this.execAction("pkexec apt autoremove"); });
+      this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
+      this.footer = new pm.PopupMenuItem('Shortcuts for APT by @rx1310');
+      this.footer.reactive = false;
+		  this.menu.addMenuItem(this.footer);
       
-      this.menu.addAction("Очистить кеш пакетов", (_) => { this.execAction("sudo apt autoclean"); });
-      this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.menu.addAction("Статистика кеша", (_) => { this.execAction("apt-cache stats"); });
-      this.menu.addAction("Найти информацию о пакете", (_) => {this.execAction(r + "apt-cache search $pkgName"); });
-      this.menu.addAction("Список доступных пакетов", (_) => { this.execAction("apt-cache pkgnames"); });
+      // this.menu.addAction("Очистить кеш пакетов", (_) => { this.execAction("pkexec apt autoclean"); });
+      // this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
+      // this.menu.addAction("Статистика кеша", (_) => { this.execAction("apt-cache stats"); });
+      // this.menu.addAction("Найти информацию о пакете", (_) => {this.execAction(r + "apt-cache search $pkgName"); });
+      // this.menu.addAction("Список доступных пакетов", (_) => { this.execAction("apt-cache pkgnames"); });
 
       //this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
 
@@ -68,9 +69,9 @@ var AptShortcutsMenu = GObject.registerClass(
     execAction(command) {
       try {
         u.trySpawnCommandLine(
-          'gnome-terminal -x bash -c "echo Нажмите Ctrl + C, если хотите отменить действие.;' +
+          'gnome-terminal -x bash -c "echo Press Ctrl + C if you want to undo the action.;' +
             command +
-            "; echo; echo ; read -n 1 -s -r -p 'Нажмите любую кнопку для закрытия окна.'\""
+            "; echo; echo ; read -n 1 -s -r -p 'Press any button to close the window.'\""
         );
         //m.notify('APT: Готово!', 'Нажмите любую кнопку для закрытия окна.');
       } catch (err) {
@@ -86,8 +87,8 @@ class Extension {
   constructor() {}
 
   enable() {
-    this.term_snippets = new AptShortcutsMenu();
-    m.panel.addToStatusArea("apt-shortcuts", this.term_snippets);
+    this.apt_shortcuts = new AptShortcutsMenu();
+    m.panel.addToStatusArea("apt-shortcuts", this.apt_shortcuts);
   }
 
   disable() {}
