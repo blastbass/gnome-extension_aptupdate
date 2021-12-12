@@ -4,7 +4,8 @@
   "name": "Shortcuts for APT",
   "shell-version": [
     "3.38",
-    "40"
+    "40",
+    "41"
   ],
   "url": "https://github.com/rx1310/gnome-extension_aptupdate",
   "uuid": "apt-shortcuts@rx1310",
