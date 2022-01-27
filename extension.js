@@ -1,4 +1,4 @@
-// ! rx1310 <rx1310@inbox.ru> | Copyright (c) rx1310, 2021 | GPLv2
+// ! rx1310 <rx1310@inbox.ru> | Copyright (c) rx1310, 2022 | GPLv2
 
 const { Clutter, Gio, GLib, GObject, Shell, St } = imports.gi;
 
@@ -7,65 +7,44 @@ const m = imports.ui.main;
 const u = imports.misc.util;
 const e = eu.getCurrentExtension();
 const p = imports.ui.panelMenu;
-const pm = imports.ui.popupMenu;
+const pm = imports.ui.popupMenu;	
 
-var AptShortcutsMenu = GObject.registerClass(
-
-  class AptShortcutsMenu extends p.Button {
-
-    _init() {
-
-      super._init(0.0, "Shortcuts for APT");
-
+var DnfShortcutsMenu = GObject.registerClass(	
+  class DnfShortcutsMenu extends p.Button {	
+    _init() {	
+      super._init(0.0, "Shortcuts for DNF");	
       let h = new St.BoxLayout({
         style_class: 'panel-status-menu-box'
-      });
-
+      });	
       let l = new St.Label({
-        text: 'APT',
+        text: 'DNF',
         y_expand: true,
         y_align: Clutter.ActorAlign.CENTER
-      });
-
+      });	
       h.add_child(l);
-      //h.add_child(pm.arrowIcon(St.Side.BOTTOM));
-
-      this.add_actor(h);
-
-      let r = "read -p 'Package name: ' pkgName; ";
-
-      this.menu.addAction("Update packages & lists", (_) => { this.execAction("pkexec apt update && pkexec apt upgrade -y"); });
+      //h.add_child(pm.arrowIcon(St.Side.BOTTOM));	
+      this.add_actor(h);	
+      let r = "read -p 'Package name: ' pkgName; ";	
+      this.menu.addAction("update", (_) => { this.execAction("pkexec dnf update"); });
+      this.menu.addAction("upgrade --refresh", (_) => { this.execAction("pkexec dnf upgrade --refresh"); });
+      this.menu.addAction("system-upgrade reboot", (_) => { this.execAction("pkexec dnf system-upgrade reboot"); });
       this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.menu.addAction("Update packages lists", (_) => { this.execAction("pkexec apt update"); });
-      this.menu.addAction("Update packages", (_) => { this.execAction("pkexec apt upgrade"); });
-      this.menu.addAction("Update packages (full-upgrade)", (_) => { this.execAction("pkexec apt full-upgrade"); });
-      this.menu.addAction("Updates list", (_) => { this.execAction("pkexec apt list --upgradable"); });
-      this.menu.addAction("Installed packages list", (_) => { this.execAction("pkexec apt list --installed"); });
+      this.menu.addAction("repoquery --unsatisfied", (_) => { this.execAction("pkexec dnf repoquery --unsatisfied"); });
+      this.menu.addAction("repoquery --duplicates", (_) => { this.execAction("pkexec dnf repoquery --duplicates"); });
       this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.menu.addAction("Install package", (_) => { this.execAction(r + "pkexec apt install $pkgName"); });
-      this.menu.addAction("Reinstall package", (_) => { this.execAction(r + "pkexec apt install $pkgName --reinstall"); });
-      this.menu.addAction("Download package", (_) => { this.execAction(r + "apt download $pkgName"); });
-      this.menu.addAction("Search package", (_) => { this.execAction(r + "pkexec apt search $pkgName"); });
-      this.menu.addAction("Uninstall package", (_) => { this.execAction(r + "pkexec apt remove $pkgName"); });
-      this.menu.addAction("Uninstall package (purge)", (_) => { this.execAction(r + "pkexec apt purge $pkgName"); });
-      this.menu.addAction("Remove unnecessary packages", (_) => { this.execAction("pkexec apt autoremove"); });
+      this.menu.addAction("list extras", (_) => { this.execAction("pkexec dnf list extras"); });
+      this.menu.addAction("autoremove", (_) => { this.execAction("pkexec dnf autoremove"); });
+      this.menu.addAction("rpm --rebuilddb", (_) => { this.execAction("pkexec rpm --rebuilddb"); });
       this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      this.footer = new pm.PopupMenuItem('Shortcuts for APT by @rx1310');
-      this.footer.reactive = false;
-		  this.menu.addMenuItem(this.footer);
-      
-      // this.menu.addAction("Очистить кеш пакетов", (_) => { this.execAction("pkexec apt autoclean"); });
+      this.menu.addAction("distro-sync", (_) => { this.execAction("pkexec dnf distro-sync"); });
+      this.menu.addAction("distro-sync --allowerasing", (_) => { this.execAction("pkexec dnf distro-sync --allowerasing"); });
+      this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
       // this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-      // this.menu.addAction("Статистика кеша", (_) => { this.execAction("apt-cache stats"); });
-      // this.menu.addAction("Найти информацию о пакете", (_) => {this.execAction(r + "apt-cache search $pkgName"); });
-      // this.menu.addAction("Список доступных пакетов", (_) => { this.execAction("apt-cache pkgnames"); });
-
-      //this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());
-
-      //this.menu.addAction("", (_) => { this.execAction(""); });
-
-    }
-
+      this.footer = new pm.PopupMenuItem('Shortcuts for DNF by @rx1310');
+      this.footer.reactive = false;			  this.menu.addMenuItem(this.footer);	
+      //this.menu.addMenuItem(new pm.PopupSeparatorMenuItem());	
+      //this.menu.addAction("", (_) => { this.execAction(""); });	
+    }	
     execAction(command) {
       try {
         u.trySpawnCommandLine(
@@ -73,27 +52,24 @@ var AptShortcutsMenu = GObject.registerClass(
             command +
             "; echo; echo ; read -n 1 -s -r -p 'Press any button to close the window.'\""
         );
-        //m.notify('APT: Готово!', 'Нажмите любую кнопку для закрытия окна.');
+        //m.notify('DNF: Error!', 'Terminal App Not Found!');
       } catch (err) {
         m.notify("Error: unable to execute command in GNOME Terminal");
       }
-    }
-
-  }
-
-);
-
+    }	
+  }	
+);	
 class Extension {
-  constructor() {}
-
+  constructor() {}	
   enable() {
-    this.apt_shortcuts = new AptShortcutsMenu();
-    m.panel.addToStatusArea("apt-shortcuts", this.apt_shortcuts);
+    this.dnf_shortcuts = new DnfShortcutsMenu();
+    m.panel.addToStatusArea("dnf-shortcuts", this.dnf_shortcuts);
+  }	
+  disable () {
+    this.dnf_shortcuts.destroy();
+    this.dnf_shortcuts = null;
   }
-
-  disable() {}
-}
-
+}	
 function init() {
   return new Extension();
 }
