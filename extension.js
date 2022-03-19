@@ -48,7 +48,7 @@ var DnfShortcutsMenu = GObject.registerClass(
     execAction(command) {
       try {
         u.trySpawnCommandLine(
-          'gnome-terminal -x bash -c "echo Press Ctrl + C if you want to undo the action.;' +
+          'xfce4-terminal -x bash -c "echo Press Ctrl + C if you want to undo the action.;' +
             command +
             "; echo; echo ; read -n 1 -s -r -p 'Press any button to close the window.'\""
         );
